@@ -3,7 +3,7 @@
 <head> 
 	<meta charset="UTF-8" />
     <title>Phaser - Making your first game, part 8</title>
-	<script type="text/javascript" src="js/phaser.min.js"></script>
+	<script type="text/javascript" src="phaser.min.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -18,21 +18,32 @@ var game = new Phaser.Game(1400, 600, Phaser.AUTO, '', { preload: preload, creat
 
 function preload() {
 
-    game.load.image('sky', 'assets/background.jpg');
-    game.load.image('ground', 'assets/platform.png');
+    
+    game.load.image('sky', 'assets/background.JPG');
+
     game.load.image('star', 'assets/star.png');
     game.load.image('ball', 'assets/soccerball.png');
-    game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+    game.load.spritesheet('dude', 'assets/dude1-1.PNG', 32, 48);
+    game.load.spritesheet('dude2', 'assets/dude2-2.PNG', 32, 48);
     game.load.image('goalpostLeft', 'assets/goalpostleft1.png');
     game.load.image('goalpostRight', 'assets/goalpostright.png');
+    game.load.image('ground', 'assets/platform.png');
+    game.load.image('blocker', 'assets/rect1.png')
+    game.load.image('scorer', 'assets/star.png')
+
 }
 
 var player;
 var player2;
 var platforms;
 var cursor;
+
 var goalpostLeft;
 var goalpostRight;
+var blocker;
+var scorer;
+var score = 0;
+var score2 = 0;
 
 var stars;
 var ball;
@@ -44,13 +55,13 @@ var sKey
 
 function create() {
 
-    //  We're going to be using physics, so enable the Arcade Physics system
+    //game physics
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    //  A simple background for our game
+    //the stands
     game.add.sprite(0, 0, 'sky');
 
-    //  The platforms group contains the ground and the 2 ledges we can jump on
+    //  The platforms group contains the ground and option of 2 legdes
     platforms = game.add.group();
 
     //  We will enable physics for any object that is created in this group
@@ -74,8 +85,29 @@ function create() {
     ledge.body.immovable = true;*/
 
     //goalposts
-    goalpostLeft = game.add.sprite(-50, game.world.height - 200, 'goalpostLeft');
-    goalpostRight = game.add.sprite(1300, game.world.height - 200, 'goalpostRight');   
+    goalpostLeft = game.add.sprite(-250, game.world.height - 225, 'goalpostLeft');
+    goalpostRight = game.add.sprite(1250, game.world.height - 225, 'goalpostRight');   
+
+   //blockers
+    blocker = game.add.group();
+    blocker.enableBody = true
+    var blocker1 = blocker.create(0,375, 'blocker');
+    blocker1.body.immovable = true;
+
+    blocker1 = blocker.create(1280, 375, 'blocker');
+    blocker1.body.immovable = true;
+
+    //use this invisible things to score when the ball hits them
+    scorer = game.add.group();
+    scorer.enableBody = true
+    var scorer1 = scorer.create(50,500, 'scorer');
+    scorer1.body.immovable = true;
+
+    scorer1 = scorer.create(1280, 375, 'scorer');
+    scorer1.body.immovable = true;   
+
+    
+
 
     //the ball
     ball = game.add.sprite(700, game.world.height - 300, 'ball');
@@ -84,7 +116,7 @@ function create() {
 
     // The player and its settings
     player = game.add.sprite(1368, game.world.height - 150, 'dude');
-    player2 = game.add.sprite(32, game.world.height - 150, 'dude');
+    player2 = game.add.sprite(32, game.world.height - 150, 'dude2');
 
     //  We need to enable physics on the player
     game.physics.arcade.enable(player);
@@ -100,7 +132,7 @@ function create() {
     player2.body.gravity.y = 500;
     player2.body.collideWorldBounds = true;
     
-    ball.body.bounce.y = 0.95;
+    ball.body.bounce.y = 0.99;
     ball.body.bounce.x = 1.1;
     ball.body.gravity.y = 200;
     ball.body.collideWorldBounds = true;
@@ -114,6 +146,7 @@ function create() {
     player2.animations.add('left', [0, 1, 2, 3], 20, true);
     player2.animations.add('right', [5, 6, 7, 8], 20, true);
 
+    /*
     //  Finally some stars to collect
     stars = game.add.group();
 
@@ -131,7 +164,7 @@ function create() {
 
         //  This just gives each star a slightly random bounce value
         star.body.bounce.y = 0.7 + Math.random() * 0.2;
-    }
+    }*/
 
     //  Our controls.
     cursors = game.input.keyboard.createCursorKeys();
@@ -140,6 +173,10 @@ function create() {
     aKey = game.input.keyboard.addKey(Phaser.Keyboard.A)
     sKey = game.input.keyboard.addKey(Phaser.Keyboard.S)
     dKey = game.input.keyboard.addKey(Phaser.Keyboard.D)
+
+    //the score
+    scoreText = game.add.text(16, 16, 'Blue: 0', { fontSize: '32px', fill: '#000' });
+    scoreText2 = game.add.text(1250, 16, 'Red: 0', { fontSize: '32px', fill: '#000' });
 }
 
 function update() {
@@ -147,17 +184,23 @@ function update() {
     //  Collide the player and the stars with the platforms
     game.physics.arcade.collide(player, platforms);
     game.physics.arcade.collide(player2, platforms);
+    
     game.physics.arcade.collide(player, player2);
+    
     game.physics.arcade.collide(ball, platforms);
     game.physics.arcade.collide(ball, player2);
     game.physics.arcade.collide(ball, player);
-
+    
+    game.physics.arcade.collide(blocker, player);
+    game.physics.arcade.collide(blocker, player2);
+    game.physics.arcade.collide(blocker, ball);   
+    game.physics.arcade.collide(blocker, stars); 
 
     game.physics.arcade.collide(stars, platforms);
 
-    //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
-    game.physics.arcade.overlap(player, stars, collectStar, null, this);
-        game.physics.arcade.overlap(player2, stars, collectStar, null, this);
+    //  Checks to see if the ball overlaps with the scorer, if he does call the collectStar function
+    game.physics.arcade.overlap(ball, scorer, scoreGoal, null, this);
+
 
     //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
@@ -223,7 +266,7 @@ function update() {
         player2.body.velocity.y = -350;
     }
 
-    //keeps the ball of the ground
+    //keeps the ball off the ground
     if (ball.body.touching.down){
         ball.body.velocity.y = -150;
     }
@@ -242,6 +285,12 @@ function collectStar (player, star) {
     // Removes the star from the screen
     star.kill();
 
+}
+
+function scoreGoal (ball, scorer) {
+
+    score += 1;
+    scoreText.text = 'Score: ' + score;
 }
 
 
