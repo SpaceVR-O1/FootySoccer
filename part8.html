@@ -42,6 +42,7 @@ var goalpostLeft;
 var goalpostRight;
 var blocker;
 var scorer;
+var scorer1;
 var score = 0;
 var score2 = 0;
 
@@ -91,19 +92,20 @@ function create() {
    //blockers
     blocker = game.add.group();
     blocker.enableBody = true
-    var blocker1 = blocker.create(0,375, 'blocker');
+    var blocker1 = blocker.create(0,374, 'blocker');
     blocker1.body.immovable = true;
 
-    blocker1 = blocker.create(1280, 375, 'blocker');
+    blocker1 = blocker.create(1280, 374, 'blocker');
     blocker1.body.immovable = true;
 
     //use this invisible things to score when the ball hits them
-    scorer = game.add.group();
-    scorer.enableBody = true
-    var scorer1 = scorer.create(50,500, 'scorer');
-    scorer1.body.immovable = true;
 
-    scorer1 = scorer.create(1280, 375, 'scorer');
+    scorer = game.add.sprite(50,475, 'scorer');
+    game.physics.arcade.enable(scorer);
+    scorer.body.immovable = true;
+
+    scorer1 = game.add.sprite(1325, 475, 'scorer');
+    game.physics.arcade.enable(scorer1);
     scorer1.body.immovable = true;   
 
     
@@ -137,34 +139,12 @@ function create() {
     ball.body.gravity.y = 200;
     ball.body.collideWorldBounds = true;
 
-
-
     //  Our two animations, walking left and right.
     player.animations.add('left', [0, 1, 2, 3], 20, true);
     player.animations.add('right', [5, 6, 7, 8], 20, true);
 
     player2.animations.add('left', [0, 1, 2, 3], 20, true);
     player2.animations.add('right', [5, 6, 7, 8], 20, true);
-
-    /*
-    //  Finally some stars to collect
-    stars = game.add.group();
-
-    //  We will enable physics for any star that is created in this group
-    stars.enableBody = true;
-
-    //  Here we'll create 12 of them evenly spaced apart
-    for (var i = 0; i < 12; i++)
-    {
-        //  Create a star inside of the 'stars' group
-        var star = stars.create(i * 70, 0, 'star');
-
-        //  Let gravity do its thing
-        star.body.gravity.y = 300;
-
-        //  This just gives each star a slightly random bounce value
-        star.body.bounce.y = 0.7 + Math.random() * 0.2;
-    }*/
 
     //  Our controls.
     cursors = game.input.keyboard.createCursorKeys();
@@ -177,6 +157,7 @@ function create() {
     //the score
     scoreText = game.add.text(16, 16, 'Blue: 0', { fontSize: '32px', fill: '#000' });
     scoreText2 = game.add.text(1250, 16, 'Red: 0', { fontSize: '32px', fill: '#000' });
+    winText = game.add.text(650, 300, '', {fontSize: '32px',fill: '#FFF'});
 }
 
 function update() {
@@ -200,10 +181,110 @@ function update() {
 
     //  Checks to see if the ball overlaps with the scorer, if he does call the collectStar function
     game.physics.arcade.overlap(ball, scorer, scoreGoal, null, this);
-
+    game.physics.arcade.overlap(ball, scorer1, scoreGoalBlue, null, this);
 
     //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
+    player2.body.velocity.x = 0;
+
+
+    var playerSpeed = 250
+    if (cursors.left.isDown)
+    {
+        //  Move to the left
+        player.body.velocity.x = -playerSpeed;
+
+        player.animations.play('left');
+    }
+    else if (cursors.right.isDown)
+    {
+        //  Move to the right
+        player.body.velocity.x = playerSpeed*2;
+
+        player.animations.play('right');
+    }
+    else
+    {
+        //  Stand still
+        player.animations.stop();
+
+        player.frame = 4;
+    }
+        if (cursors.up.isDown && (player.body.touching.down || player.body.touching.player2))
+    {
+        player.body.velocity.y = -350;
+    }
+    
+     
+    if (cursors.up.isDown && player.body.touching.down)
+    {
+        player.body.velocity.y = -350;
+    }
+    
+
+    //player2
+    if (aKey.isDown)
+    {
+        player2.body.velocity.x = -playerSpeed*2;
+
+        player2.animations.play('left');
+    }
+    else if (dKey.isDown)
+    {
+        player2.body.velocity.x = playerSpeed;
+
+        player2.animations.play('right');
+    }
+    else
+    {
+        player2.animations.stop();
+
+        player2.frame = 4;
+    }
+    
+    if (wKey.isDown && (player2.body.touching.down || player2.body.touching.player))
+    {
+        player2.body.velocity.y = -350;
+    }
+
+    //keeps the ball off the ground
+    if (ball.body.touching.down){
+        ball.body.velocity.y = -150;
+    }
+    
+    //slows down the ball on the x axis
+    if (ball.body.velocity.x > 0){
+        ball.body.gravity.x = -15
+    } else if (ball.body.velocity.x < 0){
+        ball.body.gravity.x = 15
+    }
+
+}
+
+function addBall (){
+    ball = game.add.sprite(700, game.world.height - 300, 'ball');
+
+    game.physics.arcade.enable(ball);
+    ball.body.bounce.y = 0.99;
+    ball.body.bounce.x = 1.1;
+    ball.body.gravity.y = 200;
+    ball.body.collideWorldBounds = true;
+
+        //keeps the ball off the ground
+    if (ball.body.touching.down){
+        ball.body.velocity.y = -150;
+    }
+    
+    //slows down the ball on the x axis
+    if (ball.body.velocity.x > 0){
+        ball.body.gravity.x = -15
+    } else if (ball.body.velocity.x < 0){
+        ball.body.gravity.x = 15
+    }
+}
+
+function addplayers(){
+     player.body.velocity.x = 0;
     player2.body.velocity.x = 0;
 
 
@@ -266,32 +347,89 @@ function update() {
         player2.body.velocity.y = -350;
     }
 
-    //keeps the ball off the ground
-    if (ball.body.touching.down){
-        ball.body.velocity.y = -150;
-    }
-    
-    //slows down the ball on the x axis
-    if (ball.body.velocity.x > 0){
-        ball.body.gravity.x = -15
-    } else if (ball.body.velocity.x < 0){
-        ball.body.gravity.x = 15
-    }
+    // The player and its settings
+    player = game.add.sprite(1368, game.world.height - 150, 'dude');
+    player2 = game.add.sprite(32, game.world.height - 150, 'dude2');
 
-}
+    //  We need to enable physics on the player
+    game.physics.arcade.enable(player);
+    game.physics.arcade.enable(player2);
 
-function collectStar (player, star) {
-    
-    // Removes the star from the screen
-    star.kill();
+
+    //  Player physics properties. Give the little guy a slight bounce.
+    player.body.bounce.y = 0;
+    player.body.gravity.y = 500;
+    player.body.collideWorldBounds = true;
+
+    player2.body.bounce.y = 0;
+    player2.body.gravity.y = 500;
+    player2.body.collideWorldBounds = true;
+
+    //  Our two animations, walking left and right.
+    player.animations.add('left', [0, 1, 2, 3], 20, true);
+    player.animations.add('right', [5, 6, 7, 8], 20, true);
+
+    player2.animations.add('left', [0, 1, 2, 3], 20, true);
+    player2.animations.add('right', [5, 6, 7, 8], 20, true);
+
 
 }
 
 function scoreGoal (ball, scorer) {
 
     score += 1;
-    scoreText.text = 'Score: ' + score;
+    scoreText2.text = 'Red: ' + score;
+
+    ball.kill();
+    
+    player.kill();
+    player2.kill();
+    addplayers();
+
+    if (score === 5){
+        
+
+        player.kill();
+        player2.kill();
+        ball.kill();
+
+        winText.text = "Red Wins!!!"
+
+
+
+    } else {
+    addBall();
+    }
 }
+
+function scoreGoalBlue (ball, scorer1){
+
+    score2 += 1;
+    scoreText.text = 'Blue: ' + score2;
+
+    ball.kill();
+    player.kill();
+    player2.kill();
+    addplayers();
+
+    if (score2 === 5){
+        
+
+        player.kill();
+        player2.kill();
+        ball.kill();
+        winText.text = "Blue Wins!!!";
+
+    }else {
+        addBall();
+    }
+
+
+}
+
+
+    
+
 
 
 
