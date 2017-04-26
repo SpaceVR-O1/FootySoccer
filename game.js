@@ -378,7 +378,7 @@ function scoreGoal (ball, scorer) {
     addplayers();
 
 
-    if (score === 1){
+    if (score === 5){
         
 
     	game.state.start("winred");
@@ -400,7 +400,7 @@ function scoreGoalBlue (ball, scorer1){
     player2.kill();
     addplayers();
 
-    if (score2 === 1){
+    if (score2 === 5){
         
 
     	game.state.start("winblue");
