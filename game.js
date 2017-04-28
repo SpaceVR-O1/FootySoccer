@@ -1,4 +1,5 @@
-
+var redWinCount = 0;
+var blueWinCount = 0;
 var player;
 var player2;
 var platforms;
@@ -13,6 +14,7 @@ var scorer1;
 var score = 0;
 var score2 = 0;
 var scoreboard;
+var winScore = 1;
 
 var stars;
 var ball;
@@ -25,17 +27,17 @@ var spaceKey;
 
 var gameState = {
 	preload: function preload() {
-	    game.load.image('sky', 'assets/background.JPG');
-
-	    game.load.image('star', 'assets/star.png');
+	    
+	    game.load.image('sky', 'assets/newBackground.JPG');
+		game.load.image('star', 'assets/star.png');
 	    game.load.image('ball', 'assets/soccerball.png');
 	    game.load.spritesheet('dude', 'assets/dude1-1.PNG', 32, 48);
 	    game.load.spritesheet('dude2', 'assets/dude2-2.PNG', 32, 48);
 	    game.load.image('goalpostLeft', 'assets/goalpostleft1.png');
 	    game.load.image('goalpostRight', 'assets/goalpostright.png');
-	    game.load.image('ground', 'assets/platform.png');
+	    game.load.image('ground', 'assets/realgrass.JPG');
 	    game.load.image('blocker', 'assets/rect1.png');
-	    game.load.image('scorer', 'assets/star.png');
+	    game.load.image('scorer', 'assets/rect2.png');
 	    game.load.image('scoreboard', 'assets/scoreboard.JPG');
 
 	    game.load.audio('song', 'assets/song.mp3');
@@ -378,9 +380,9 @@ function scoreGoal (ball, scorer) {
     addplayers();
 
 
-    if (score === 5){
+    if (score === winScore){
         
-
+    	redWinCount += 1;
     	game.state.start("winred");
 
 
@@ -400,9 +402,9 @@ function scoreGoalBlue (ball, scorer1){
     player2.kill();
     addplayers();
 
-    if (score2 === 5){
+    if (score2 === winScore){
         
-
+    	blueWinCount += 1;
     	game.state.start("winblue");
 
     }else {
