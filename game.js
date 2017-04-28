@@ -383,6 +383,8 @@ function scoreGoal (ball, scorer) {
     if (score === winScore){
         
     	redWinCount += 1;
+    	score = 0;
+    	score2 = 0;
     	game.state.start("winred");
 
 
@@ -405,6 +407,8 @@ function scoreGoalBlue (ball, scorer1){
     if (score2 === winScore){
         
     	blueWinCount += 1;
+    	score = 0;
+    	score2 = 0;
     	game.state.start("winblue");
 
     }else {
