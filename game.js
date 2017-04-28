@@ -14,7 +14,7 @@ var scorer1;
 var score = 0;
 var score2 = 0;
 var scoreboard;
-var winScore = 1;
+var winScore = 5;
 
 var stars;
 var ball;
