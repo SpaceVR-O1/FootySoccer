@@ -1,6 +1,6 @@
 var winStateBlue = {
 	preload: function preload(){
-			game.load.image('winblue', 'assets/bluewins.jpg');
+			game.load.image('winblue', 'assets/bluewins1.JPG');
 	},
 	create: function create(){
 		game.add.sprite(0,0, 'winblue');
