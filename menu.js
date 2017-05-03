@@ -13,7 +13,9 @@ var menuState = {
 		//set spacebar key
 		menuCursors = game.input.keyboard.createCursorKeys();
 		menuSpaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-		iKey = game.input.keyboard.addKey(Phaser.Keyboard.I)
+		iKey = game.input.keyboard.addKey(Phaser.Keyboard.I);
+
+		instructText = game.add.text(10, 10, "Press [ i ] for instructions ", { fontSize: '32px', fill: '#FFF' });
 	},
 	update: function update() {
 		
